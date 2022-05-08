@@ -1,16 +1,10 @@
-# This is a sample Python script.
+from os import environ
+from deepl import Translator
 
-# Press Umschalt+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+auth_key = environ.get('AUTH_KEY')
 
+translator = Translator(auth_key=auth_key)
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Strg+F8 to toggle the breakpoint.
+result = translator.translate_text("Hello World!", target_lang="DE")
 
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+print(result)
