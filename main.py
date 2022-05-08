@@ -13,6 +13,8 @@ class TranslateCsv:
     def __init__(self, file):
         self.FILE_IN = self.check_file(file=file)
         self.FILE_OUT = self.new_file_path()
+        self.auth_key = environ.get('AUTH_KEY')
+        self.translator = self.create_translator()
         self.headers = None
         self.text = None
         self.text_translated = None
@@ -33,13 +35,19 @@ class TranslateCsv:
         temp = self.FILE_IN.split('.')
         return join(temp[0] + '_translated.csv')
 
-    def translate(self):
+    def create_translator(self):
+        """Create a translator object."""
+
+        try:
+            return Translator(auth_key=self.auth_key)
+        except Exception as e:
+            print(e)
+            exit()
+
+    def translate_text(self):
         """Translate text with the deepL-API."""
 
-        auth_key = environ.get('AUTH_KEY')
-
-        translator = Translator(auth_key=auth_key)
-        result = translator.translate_text(text=self.text, target_lang="DE")
+        result = self.translator.translate_text(text=self.text, target_lang="DE")
         result_clean = result.text.replace(',', '')
 
         self.text_translated = result_clean
@@ -60,13 +68,23 @@ class TranslateCsv:
             for row in r_csv:
                 temp = row[1:]
                 self.text = ' '.join(temp)
-                self.translate()
+                self.translate_text()
                 row[1] = self.text_translated
                 w_csv.writerow(row)
+
+    def deepl_limit_exceeded(self):
+        """Check deepl account for its limit."""
+
+        usage = self.translator.get_usage()
+        if usage.character.limit_exceeded:
+            return True
+        else:
+            return False
 
 
 if __name__ == "__main__":
     FILE = "data/test_data.csv"
     c = TranslateCsv(FILE)
-    c.translate_csv()
+    #c.translate_csv()
+    print(c.deepl_limit_exceeded())
 
