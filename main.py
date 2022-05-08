@@ -1,9 +1,7 @@
 import csv
 from os import environ, getcwd
 from os.path import join, exists
-
-import deepl.exceptions
-from deepl import Translator
+from deepl import Translator, exceptions
 from dotenv import load_dotenv
 from tqdm import tqdm
 from tkinter import Tk, filedialog
@@ -55,7 +53,7 @@ class TranslateCsv:
             result_clean = result.text.replace(',', '')
             self.text_translated = result_clean
 
-        except deepl.exceptions.QuotaExceededException as e:
+        except exceptions.QuotaExceededException as e:
             print("Limit exceeded!")
             return False
 
