@@ -1,9 +1,10 @@
 import csv
-from os import environ
+from os import environ, getcwd
 from os.path import join, exists
-from deepl import Translator
+from deepl import Translator, exceptions
 from dotenv import load_dotenv
 from tqdm import tqdm
+from tkinter import Tk, filedialog
 
 load_dotenv()
 
@@ -47,11 +48,14 @@ class TranslateCsv:
 
     def translate_text(self):
         """Translate text with the deepL-API."""
+        try:
+            result = self.translator.translate_text(text=self.text, target_lang="DE")
+            result_clean = result.text.replace(',', '')
+            self.text_translated = result_clean
 
-        result = self.translator.translate_text(text=self.text, target_lang="DE")
-        result_clean = result.text.replace(',', '')
-
-        self.text_translated = result_clean
+        except exceptions.QuotaExceededException as e:
+            print("Limit exceeded!")
+            return False
 
     def translate_csv(self):
         """Open .csv and translate line by line."""
@@ -67,12 +71,10 @@ class TranslateCsv:
             w_csv.writerow(self.headers)
 
             for row in tqdm(r_csv):
-                if self.deepl_limit_exceeded():
-                    break
-
                 temp = row[1:]
                 self.text = ' '.join(temp)
-                self.translate_text()
+                if not self.translate_text():
+                    break
                 row = [row[0], self.text_translated]
                 w_csv.writerow(row)
 
@@ -93,6 +95,15 @@ class TranslateCsv:
 
 
 if __name__ == "__main__":
-    FILE = "data/test_data.csv"
+    print("\n" + 10*"* " + "CSV-Translator" + 10*" *" + "\n")
+
+    root = Tk()
+    root.withdraw()
+    FILE = filedialog.askopenfilename(filetypes=(("csv files", "*.csv"), ("csv files", "*.CSV")),
+                                      parent=root,
+                                      initialdir=getcwd(),
+                                      title='Choose .csv:')
+
     c = TranslateCsv(FILE)
+    c.print_limit()
     c.translate_csv()
