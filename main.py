@@ -3,6 +3,7 @@ from os import environ
 from os.path import join, exists
 from deepl import Translator
 from dotenv import load_dotenv
+from tqdm import tqdm
 
 load_dotenv()
 
@@ -65,14 +66,14 @@ class TranslateCsv:
 
             w_csv.writerow(self.headers)
 
-            for row in r_csv:
+            for row in tqdm(r_csv):
                 if self.deepl_limit_exceeded():
                     break
 
                 temp = row[1:]
                 self.text = ' '.join(temp)
                 self.translate_text()
-                row[1] = self.text_translated
+                row = [row[0], self.text_translated]
                 w_csv.writerow(row)
 
     def deepl_limit_exceeded(self):
@@ -88,6 +89,4 @@ class TranslateCsv:
 if __name__ == "__main__":
     FILE = "data/test_data.csv"
     c = TranslateCsv(FILE)
-    #c.translate_csv()
-    print(c.deepl_limit_exceeded())
-
+    c.translate_csv()
