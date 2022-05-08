@@ -28,6 +28,7 @@ def main(file):
 
     print("\n" + 10 * "*" + " CSV-Translator " + 10 * "*" + "\n")
     translator = TranslateCsv(file=file)
+    translator.check_limit()
     translator.translate_csv()
 
 

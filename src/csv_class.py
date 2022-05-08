@@ -35,8 +35,7 @@ class TranslateCsv:
         if exists(file) and file.endswith('.csv'):
             return file
         else:
-            print("File not found / no .csv!")
-            exit()
+            exit("File not found / no .csv!")
 
     def new_file_path(self):
         """Creates a new file path for the translated file."""
@@ -50,9 +49,9 @@ class TranslateCsv:
 
         try:
             return Translator(auth_key=environ.get('AUTH_KEY'))
+
         except deepl.exceptions.AuthorizationException as e:
-            print("Authorization failed!")
-            exit()
+            exit("Authorization failed!")
 
     def translate_text(self, target_lang="DE"):
         """Translate text with the deepL-API."""
@@ -90,6 +89,8 @@ class TranslateCsv:
 
                         if not self.translate_text():
                             raise TranslationException
+                        else:
+                            self.set_limit()
 
                         self.text_translated = self.text
                         temp.append(self.text_translated)
@@ -114,4 +115,4 @@ class TranslateCsv:
 
         usage = self.translator.get_usage()
         if usage.character.limit_exceeded:
-            exit("Character limit reached!")
+            exit("Character limit already reached!")
