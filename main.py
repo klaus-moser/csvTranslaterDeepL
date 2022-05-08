@@ -85,6 +85,12 @@ class TranslateCsv:
         else:
             return False
 
+    def print_limit(self):
+        """Print deepL limits."""
+
+        usage = self.translator.get_usage()
+        print("Usage:", usage.character)
+
 
 if __name__ == "__main__":
     FILE = "data/test_data.csv"
