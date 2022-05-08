@@ -7,18 +7,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def translate(text: str):
-    """Translate text with the deepL-API."""
-
-    auth_key = environ.get('AUTH_KEY')
-
-    translator = Translator(auth_key=auth_key)
-    result = translator.translate_text(text=text, target_lang="DE")
-    result_clean = result.replace(',', '')
-
-    return result_clean
-
-
 class TranslateCsv:
     """Super Class."""
 
@@ -26,6 +14,8 @@ class TranslateCsv:
         self.FILE_IN = self.check_file(file=file)
         self.FILE_OUT = self.new_file_path()
         self.headers = None
+        self.text = None
+        self.text_translated = None
 
     @staticmethod
     def check_file(file):
@@ -43,6 +33,17 @@ class TranslateCsv:
         temp = self.FILE_IN.split('.')
         return join(temp[0] + '_translated.csv')
 
+    def translate(self):
+        """Translate text with the deepL-API."""
+
+        auth_key = environ.get('AUTH_KEY')
+
+        translator = Translator(auth_key=auth_key)
+        result = translator.translate_text(text=self.text, target_lang="DE")
+        result_clean = result.text.replace(',', '')
+
+        self.text_translated = result_clean
+
     def translate_csv(self):
         """Open .csv and translate line by line."""
 
@@ -57,6 +58,9 @@ class TranslateCsv:
             w_csv.writerow(self.headers)
 
             for row in r_csv:
+                self.text = row[1]
+                self.translate()
+                row[1] = self.text_translated
                 w_csv.writerow(row)
 
 
