@@ -1,6 +1,8 @@
 import csv
 from os import environ, getcwd
 from os.path import join, exists
+
+import deepl.exceptions
 from deepl import Translator
 from dotenv import load_dotenv
 from tqdm import tqdm
@@ -48,11 +50,14 @@ class TranslateCsv:
 
     def translate_text(self):
         """Translate text with the deepL-API."""
+        try:
+            result = self.translator.translate_text(text=self.text, target_lang="DE")
+            result_clean = result.text.replace(',', '')
+            self.text_translated = result_clean
 
-        result = self.translator.translate_text(text=self.text, target_lang="DE")
-        result_clean = result.text.replace(',', '')
-
-        self.text_translated = result_clean
+        except deepl.exceptions.QuotaExceededException as e:
+            print("Limit exceeded!")
+            return False
 
     def translate_csv(self):
         """Open .csv and translate line by line."""
@@ -68,12 +73,10 @@ class TranslateCsv:
             w_csv.writerow(self.headers)
 
             for row in tqdm(r_csv):
-                if self.deepl_limit_exceeded():
-                    break
-
                 temp = row[1:]
                 self.text = ' '.join(temp)
-                self.translate_text()
+                if not self.translate_text():
+                    break
                 row = [row[0], self.text_translated]
                 w_csv.writerow(row)
 
@@ -104,4 +107,5 @@ if __name__ == "__main__":
                                       title='Choose .csv:')
 
     c = TranslateCsv(FILE)
+    c.print_limit()
     c.translate_csv()
