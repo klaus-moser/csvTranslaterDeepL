@@ -66,6 +66,9 @@ class TranslateCsv:
             w_csv.writerow(self.headers)
 
             for row in r_csv:
+                if self.deepl_limit_exceeded():
+                    break
+
                 temp = row[1:]
                 self.text = ' '.join(temp)
                 self.translate_text()
