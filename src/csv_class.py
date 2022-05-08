@@ -107,7 +107,7 @@ class TranslateCsv:
 
                         if not self.translate_text():
                             raise TranslationException
-
+                        self.clean_text()
                         temp.append(self.text_translated)
                     w_csv.writerow(temp)
 
