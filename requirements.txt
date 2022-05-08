@@ -1,7 +1,6 @@
 certifi==2021.10.8
 charset-normalizer==2.0.12
 deepl==1.6.0
-idna==3.3
 pip==22.0.4
 requests==2.27.1
 setuptools==60.2.0

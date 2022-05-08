@@ -14,19 +14,23 @@ from os.path import join, exists
 from deepl import Translator, exceptions
 from tqdm import tqdm
 from exceptions import TranslationException
+from googletrans import Translator
 
 
 class TranslateCsv:
     """CSV Translator class."""
 
-    def __init__(self, file):
+    def __init__(self, file, type_='google', src='en', dest='de'):
         self.FILE_IN = self.check_file(file=file)
         self.FILE_OUT = self.new_file_path()
+        self.type = type_
         self.translator = self.create_translator()
         self.headers = None
         self.text = None
         self.text_translated = None
         self.limit = 0
+        self.src_lang = src
+        self.dst_lang = dest
 
     @staticmethod
     def check_file(file):
@@ -43,25 +47,39 @@ class TranslateCsv:
         temp = self.FILE_IN.split('.')
         return join(temp[0] + '_translated.csv')
 
-    @staticmethod
-    def create_translator():
+    def create_translator(self):
         """Create a translator object."""
 
-        try:
-            return Translator(auth_key=environ.get('AUTH_KEY'))
+        if self.type == 'google':
+            return Translator()
 
-        except deepl.exceptions.AuthorizationException as e:
-            exit("Authorization failed!")
+        else:
+            try:
+                return Translator(auth_key=environ.get('AUTH_KEY'))
 
-    def translate_text(self, target_lang="DE"):
+            except deepl.exceptions.AuthorizationException as e:
+                exit("Authorization failed!")
+
+    def translate_text(self):
         """Translate text with the deepL-API."""
 
-        try:
-            self.text_translated = self.translator.translate_text(text=self.text, target_lang=target_lang)
-
-        except exceptions.QuotaExceededException as e:
-            print("Limit exceeded!")
-            return False
+        if self.type == 'google':
+            try:
+                src = self.src_lang.lower()
+                dst = self.dst_lang.lower()
+                self.text_translated = self.translator.translate(text=self.text, src=src, dest=dst).text
+                return True
+            except Exception as e:
+                return False
+        else:
+            try:
+                src = self.src_lang.upper()
+                dst = self.dst_lang.upper()
+                self.text_translated = self.translator.translate_text(text=self.text, source_lang=src, target_lang=dst)
+                return True
+            except exceptions.QuotaExceededException as e:
+                print("Limit exceeded!")
+                return False
 
     def clean_text(self, letter=','):
         """Remove chosen letters."""
@@ -89,30 +107,16 @@ class TranslateCsv:
 
                         if not self.translate_text():
                             raise TranslationException
-                        else:
-                            self.set_limit()
 
-                        self.text_translated = self.text
                         temp.append(self.text_translated)
                     w_csv.writerow(temp)
 
             except TranslationException:
                 pass
 
-    def set_limit(self):
-        """Save the limit of the characters."""
-
-        self.limit = self.translator.get_usage()
-
-    def get_limit(self):
-        """Print deepL limits."""
-
-        usage = self.translator.get_usage()
-        print("Usage:", usage.character)
-
     def check_limit(self):
         """Check deepl account for its limit."""
 
         usage = self.translator.get_usage()
         if usage.character.limit_exceeded:
-            exit("Character limit already reached!")
+            exit(f"Character limit already reached: {usage.character}")
