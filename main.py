@@ -43,8 +43,11 @@ class TranslateCsv:
         temp = self.FILE_IN.split('.')
         return join(temp[0] + '_translated.csv')
 
-    def edit_csv(self):
-        with open(file=self.FILE_IN, mode='r', encoding='utf-8') as r, open(file=self.FILE_OUT, mode='w', encoding='utf-8') as w:
+    def translate_csv(self):
+        """Open .csv and translate line by line."""
+
+        with open(file=self.FILE_IN, mode='r', encoding='utf-8') as r,\
+                open(file=self.FILE_OUT, mode='w', newline='', encoding='utf-8') as w:
             r_csv = csv.reader(r)
             w_csv = csv.writer(w)
 
@@ -60,5 +63,5 @@ class TranslateCsv:
 if __name__ == "__main__":
     FILE = "data/test_data.csv"
     c = TranslateCsv(FILE)
-    c.edit_csv()
+    c.translate_csv()
 
