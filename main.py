@@ -58,7 +58,8 @@ class TranslateCsv:
             w_csv.writerow(self.headers)
 
             for row in r_csv:
-                self.text = row[1]
+                temp = row[1:]
+                self.text = ' '.join(temp)
                 self.translate()
                 row[1] = self.text_translated
                 w_csv.writerow(row)
