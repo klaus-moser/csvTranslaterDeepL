@@ -1,5 +1,8 @@
 from os import environ
 from deepl import Translator
+from dotenv import load_dotenv
+
+load_dotenv()
 
 auth_key = environ.get('AUTH_KEY')
 
