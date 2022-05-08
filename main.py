@@ -1,9 +1,10 @@
 import csv
-from os import environ
+from os import environ, getcwd
 from os.path import join, exists
 from deepl import Translator
 from dotenv import load_dotenv
 from tqdm import tqdm
+from tkinter import Tk, filedialog
 
 load_dotenv()
 
@@ -93,6 +94,14 @@ class TranslateCsv:
 
 
 if __name__ == "__main__":
-    FILE = "data/test_data.csv"
+    print("\n" + 10*"* " + "CSV-Translator" + 10*" *" + "\n")
+
+    root = Tk()
+    root.withdraw()
+    FILE = filedialog.askopenfilename(filetypes=(("csv files", "*.csv"), ("csv files", "*.CSV")),
+                                      parent=root,
+                                      initialdir=getcwd(),
+                                      title='Choose .csv:')
+
     c = TranslateCsv(FILE)
     c.translate_csv()
