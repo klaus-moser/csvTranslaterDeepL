@@ -65,21 +65,22 @@ class TranslateCsv:
 
         if self.type == 'google':
             try:
-                src = self.src_lang.lower()
-                dst = self.dst_lang.lower()
-                self.text_translated = self.translator.translate(text=self.text, src=src, dest=dst).text
-                return True
+                self.text_translated = self.translator.translate(text=self.text,
+                                                                 src=self.src_lang.lower(),
+                                                                 dest=self.dst_lang.lower()).text
+
             except Exception as e:
                 return False
         else:
             try:
-                src = self.src_lang.upper()
-                dst = self.dst_lang.upper()
-                self.text_translated = self.translator.translate_text(text=self.text, source_lang=src, target_lang=dst)
-                return True
+                self.text_translated = self.translator.translate_text(text=self.text,
+                                                                      source_lang=self.src_lang.upper(),
+                                                                      target_lang=self.dst_lang.upper())
+
             except exceptions.QuotaExceededException as e:
                 print("Limit exceeded!")
                 return False
+        return True
 
     def clean_text(self, letter=','):
         """Remove chosen letters."""
